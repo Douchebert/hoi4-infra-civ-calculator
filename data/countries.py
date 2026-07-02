@@ -1,6 +1,27 @@
 # Country starting data presets
 
 COUNTRY_PRESETS = {
+    "Sweden": {
+        "starting_civs": 9,
+        "starting_mils": 3,
+        "consumer_goods_percent": 0,
+        "global_construction_bonus":0,
+        "economy_law": "Civilian Economy",
+        "states": [
+            {"name": "Skåne", "max_slots": 6, "used_slots": 2, "infra": 3},
+            {"name": "Småland", "max_slots": 2, "used_slots": 1, "infra": 3},
+            {"name": "Västergötland", "max_slots": 4, "used_slots": 3, "infra": 3},
+            {"name": "Bohuslän", "max_slots": 2, "used_slots": 0, "infra": 3},
+            {"name": "Gotland", "max_slots": 1, "used_slots": 0, "infra": 3},
+            {"name": "Södermanland", "max_slots": 6, "used_slots": 6, "infra": 4},
+            {"name": "Värmland", "max_slots": 2, "used_slots": 0, "infra": 2},
+            {"name": "Dalarna", "max_slots": 2, "used_slots": 0, "infra": 3},
+            {"name": "Gävleborg", "max_slots": 4, "used_slots": 1, "infra": 2, "infra_mod": 15, "civ_mod": 15},
+            {"name": "Jämtland", "max_slots": 2, "used_slots": 0, "infra": 2},
+            {"name": "Västerbotten", "max_slots": 2, "used_slots": 0, "infra": 2},
+            {"name": "Norrbotten", "max_slots": 2, "used_slots": 1, "infra": 2},
+        ]
+    },
     "Germany": {
         "starting_civs": 25,
         "starting_mils": 15,
