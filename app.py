@@ -40,6 +40,12 @@ with col_g1:
 with col_g2:
     global_infra_mod = st.slider("Global Infrastructure Speed Modifier (%)", -100, 100, 0, step=5)
 
+# Consumer Goods
+st.subheader("Consumer Goods")
+consumer_goods = st.slider("Consumer Goods Factories (%)", 0, 50, 30, step=5)
+
+st.caption("Global modifiers above • Per-state modifiers in States section")
+
 # ===================== FOCUS / EVENTS =====================
 st.header("Focuses, Events & National Spirits")
 
@@ -62,13 +68,13 @@ if enable_events:
             with col2:
                 event["type"] = st.selectbox("Bonus Type", 
                     ["+ Civilian Factories", "+ Infrastructure Levels", "+ Max Build Slots", 
-                     "+ Construction Speed %"], 
+                     "+ Construction Speed %", "- Consumer Goods %"], 
                     index=0, key=f"ev_type_{i}")
                 # Fixed: consistent float types
                 event["amount"] = st.number_input(
-                    "Amount", 
-                    value=float(event.get("amount", 1.0)), 
-                    step=1.0, 
+                    "Amount",
+                    value=float(event.get("amount", 1.0)),
+                    step=1.0,
                     key=f"ev_amount_{i}"
                 )
             
@@ -143,5 +149,22 @@ avg_infra = sum(s["infra"] for s in st.session_state.states) / len(st.session_st
 st.metric("Total Max Slots", total_max)
 st.metric("Total Slots Used", f"{total_used} / {total_max}")
 st.metric("Average Infrastructure", f"{avg_infra:.1f}")
+
+# ===================== CALCULATIONS =====================
+st.header("Build Order Simulation")
+
+total_days = st.slider("Simulation Length (days)", 30, 730, 365, step=30)
+
+if st.button("Run Day-by-Day Simulation", type="primary"):
+    with st.spinner("Running simulation..."):
+        # Simple placeholder calculation for now
+        total_civs_start = sum(1 for s in st.session_state.states for _ in range(0))  # placeholder
+        projected_civs = 25 + (total_days / 180) * 5   # very rough
+        
+        st.success("Simulation Complete")
+        st.metric("Projected Civilian Factories", f"{projected_civs:.1f}")
+        st.info("Full day-by-day logic with infra bonuses, events, and build priorities coming in next update.")
+        
+        # We'll expand this heavily next
 
 st.caption("Layout complete • Global + Per-State + Events support")
