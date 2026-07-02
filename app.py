@@ -10,8 +10,8 @@ import copy
 
 @dataclass
 class GameState:
-    current_civs: int = 25
-    current_mils: int = 10
+    current_civs: int = 9
+    current_mils: int = 3
     consumer_goods_percent: float = 30.0
     global_construction_bonus: float = 15.0
     states: List[Dict] = field(default_factory=list)
