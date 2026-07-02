@@ -9,6 +9,7 @@ st.header("Nation-wide Settings")
 col1, col2 = st.columns(2)
 
 with col1:
+    starting_civs = st.number_input("Starting Civilian Factories", min_value=0, value=25, step=1)
     current_economy = st.selectbox(
         "Current Economy Law",
         ["Civilian Economy", "Early Mobilization", "Partial Mobilization", 
@@ -19,6 +20,7 @@ with col1:
     global_speed = st.slider("Global Construction Speed Bonus (%)", -100, 200, 15, step=5)
 
 with col2:
+    starting_mils = st.number_input("Starting Military Factories", min_value=0, value=10, step=1)
     enable_eco_change = st.checkbox("Enable Planned Economy Law Change", value=False)
     
     if enable_eco_change:
@@ -67,10 +69,9 @@ if enable_events:
             
             with col2:
                 event["type"] = st.selectbox("Bonus Type", 
-                    ["+ Civilian Factories", "+ Infrastructure Levels", "+ Max Build Slots", 
-                     "+ Construction Speed %", "- Consumer Goods %"], 
+                    ["+ Civilian Factories", "+ Military Factories", "+ Infrastructure Levels", 
+                     "+ Max Build Slots", "+ Construction Speed %", "- Consumer Goods %"], 
                     index=0, key=f"ev_type_{i}")
-                # Fixed: consistent float types
                 event["amount"] = st.number_input(
                     "Amount",
                     value=float(event.get("amount", 1.0)),
