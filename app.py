@@ -9,7 +9,7 @@ st.header("Nation-wide Settings")
 col1, col2 = st.columns(2)
 
 with col1:
-    starting_civs = st.number_input("Starting Civilian Factories", min_value=0, value=25, step=1)
+    starting_civs = st.number_input("Starting Civilian Factories", min_value=0, value=6, step=1)
     current_economy = st.selectbox(
         "Current Economy Law",
         ["Civilian Economy", "Early Mobilization", "Partial Mobilization", 
@@ -20,7 +20,7 @@ with col1:
     global_speed = st.slider("Global Construction Speed Bonus (%)", -100, 200, 15, step=5)
 
 with col2:
-    starting_mils = st.number_input("Starting Military Factories", min_value=0, value=10, step=1)
+    starting_mils = st.number_input("Starting Military Factories", min_value=0, value=2, step=1)
     enable_eco_change = st.checkbox("Enable Planned Economy Law Change", value=False)
     
     if enable_eco_change:
@@ -98,7 +98,7 @@ st.header("States")
 
 if "states" not in st.session_state:
     st.session_state.states = [
-        {"name": f"State {i+1}", "max_slots": 15, "used_slots": 0, "infra": 3, 
+        {"name": f"State {i+1}", "max_slots": 6, "used_slots": 0, "infra": 3, 
          "infra_mod": 0, "civ_mod": 0, "sync": True}
         for i in range(3)
     ]
@@ -151,21 +151,63 @@ st.metric("Total Max Slots", total_max)
 st.metric("Total Slots Used", f"{total_used} / {total_max}")
 st.metric("Average Infrastructure", f"{avg_infra:.1f}")
 
-# ===================== CALCULATIONS =====================
-st.header("Build Order Simulation")
+# ===================== CALCULATION ENGINE =====================
+st.header("Optimal Build Order Simulation")
 
 total_days = st.slider("Simulation Length (days)", 30, 730, 365, step=30)
+show_debug = st.checkbox("Show Debug Info", value=True)
 
-if st.button("Run Day-by-Day Simulation", type="primary"):
+if st.button("Calculate Optimal Build Order", type="primary"):
     with st.spinner("Running simulation..."):
-        # Simple placeholder calculation for now
-        total_civs_start = sum(1 for s in st.session_state.states for _ in range(0))  # placeholder
-        projected_civs = 25 + (total_days / 180) * 5   # very rough
         
-        st.success("Simulation Complete")
-        st.metric("Projected Civilian Factories", f"{projected_civs:.1f}")
-        st.info("Full day-by-day logic with infra bonuses, events, and build priorities coming in next update.")
+        best_result = {"score": -1.0, "order": []}
         
-        # We'll expand this heavily next
+        def get_infra_multiplier(infra_level):
+            return 1.0 + (infra_level * 0.2)
+        
+        def simulate(current_civs, sim_states, actions_left, current_order):
+            if actions_left <= 0:
+                if current_civs > best_result["score"]:
+                    best_result["score"] = current_civs
+                    best_result["order"] = current_order[:]
+                return
+            
+            for idx, state in enumerate(sim_states):
+                open_slots = state["max_slots"] - state["used_slots"]
+                if open_slots <= 0:
+                    continue
+                
+                infra_mult = get_infra_multiplier(state["infra"])
+                
+                # Calculate scores
+                infra_score = open_slots * 3 - (state["infra"] * 5)
+                civ_score = open_slots * 2.5 + (state["infra"] * 4) + (infra_mult * 10)
+                
+                if show_debug:
+                    st.write(f"Debug | State: {state['name']} | Infra score: {infra_score:.1f} | Civ score: {civ_score:.1f} | Infra mult: {infra_mult:.1f}x")
+                
+                # Choose best action for this state
+                if infra_score > civ_score and state["infra"] < 5:
+                    new_states = [s.copy() for s in sim_states]
+                    new_states[idx]["infra"] += 1
+                    new_order = current_order + [f"Infrastructure in {state['name']} (infra {state['infra']} → {state['infra']+1})"]
+                    simulate(current_civs, new_states, actions_left-1, new_order)
+                else:
+                    new_states = [s.copy() for s in sim_states]
+                    new_states[idx]["used_slots"] += 1
+                    new_order = current_order + [f"Civilian Factory in {state['name']} (infra {state['infra']}, speed {infra_mult:.1f}x)"]
+                    simulate(current_civs + 0.3, new_states, actions_left-1, new_order)
+        
+        # Run
+        sim_states = [s.copy() for s in st.session_state.states]
+        simulate(float(starting_civs), sim_states, 8, [])
+        
+        st.success("Best build order found")
+        
+        st.subheader("Recommended Build Order")
+        for idx, action in enumerate(best_result["order"], 1):
+            st.write(f"{idx}. {action}")
+        
+        st.metric("Projected Civilian Factories", int(best_result["score"]))
 
 st.caption("Layout complete • Global + Per-State + Events support")
